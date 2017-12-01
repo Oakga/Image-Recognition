@@ -1,0 +1,193 @@
+Image Headers
+19 31 1 21
+Connected Components Properties:
+Number: 1
+Label: 1
+numbpixels: 13
+BoundingBox:
+minRow: 2
+minCol: 13
+maxRow: 7
+maxCol: 17
+
+Number: 2
+Label: 2
+numbpixels: 24
+BoundingBox:
+minRow: 3
+minCol: 5
+maxRow: 19
+maxCol: 9
+
+Number: 3
+Label: 3
+numbpixels: 2
+BoundingBox:
+minRow: 3
+minCol: 22
+maxRow: 4
+maxCol: 22
+
+Number: 4
+Label: 4
+numbpixels: 4
+BoundingBox:
+minRow: 4
+minCol: 3
+maxRow: 5
+maxCol: 4
+
+Number: 5
+Label: 5
+numbpixels: 2
+BoundingBox:
+minRow: 4
+minCol: 19
+maxRow: 5
+maxCol: 19
+
+Number: 6
+Label: 6
+numbpixels: 17
+BoundingBox:
+minRow: 4
+minCol: 26
+maxRow: 18
+maxCol: 27
+
+Number: 7
+Label: 7
+numbpixels: 1
+BoundingBox:
+minRow: 5
+minCol: 23
+maxRow: 5
+maxCol: 23
+
+Number: 8
+Label: 8
+numbpixels: 1
+BoundingBox:
+minRow: 6
+minCol: 20
+maxRow: 6
+maxCol: 20
+
+Number: 9
+Label: 9
+numbpixels: 1
+BoundingBox:
+minRow: 6
+minCol: 22
+maxRow: 6
+maxCol: 22
+
+Number: 10
+Label: 10
+numbpixels: 1
+BoundingBox:
+minRow: 7
+minCol: 21
+maxRow: 7
+maxCol: 21
+
+Number: 11
+Label: 11
+numbpixels: 13
+BoundingBox:
+minRow: 8
+minCol: 5
+maxRow: 19
+maxCol: 6
+
+Number: 12
+Label: 12
+numbpixels: 11
+BoundingBox:
+minRow: 8
+minCol: 14
+maxRow: 17
+maxCol: 15
+
+Number: 13
+Label: 13
+numbpixels: 11
+BoundingBox:
+minRow: 8
+minCol: 21
+maxRow: 17
+maxCol: 22
+
+Number: 14
+Label: 14
+numbpixels: 3
+BoundingBox:
+minRow: 8
+minCol: 29
+maxRow: 10
+maxCol: 29
+
+Number: 15
+Label: 15
+numbpixels: 9
+BoundingBox:
+minRow: 13
+minCol: 29
+maxRow: 19
+maxCol: 30
+
+Number: 16
+Label: 16
+numbpixels: 1
+BoundingBox:
+minRow: 14
+minCol: 20
+maxRow: 14
+maxCol: 20
+
+Number: 17
+Label: 17
+numbpixels: 9
+BoundingBox:
+minRow: 15
+minCol: 15
+maxRow: 19
+maxCol: 18
+
+Number: 18
+Label: 18
+numbpixels: 1
+BoundingBox:
+minRow: 15
+minCol: 19
+maxRow: 15
+maxCol: 19
+
+Number: 19
+Label: 19
+numbpixels: 1
+BoundingBox:
+minRow: 18
+minCol: 20
+maxRow: 18
+maxCol: 20
+
+Number: 20
+Label: 20
+numbpixels: 2
+BoundingBox:
+minRow: 19
+minCol: 18
+maxRow: 19
+maxCol: 19
+
+Number: 21
+Label: 21
+numbpixels: 1
+BoundingBox:
+minRow: 19
+minCol: 21
+maxRow: 19
+maxCol: 21
+
+
