@@ -53,9 +53,9 @@ public:
             imageAry[i] = new int[numCols];
         }
         HPP = new int [numRows]();
-        HPPbin = new int [numCols];
+        HPPbin = new int [numRows]();
         VPP = new int [numCols]();
-        VPPbin = new int [numCols];
+        VPPbin = new int [numCols]();
     };
     ~imagePP(){
         imageScan.close();
@@ -90,28 +90,31 @@ public:
                 }
             }
         }
-        // for (int i = 0; i < numRows; i++)
-        // {
-        //     for (int j = 0; j < numCols; j++)
-        //     {
-        //         if(imageAry[i][j]>0){
-        //             HPP[i]++;
-        //             VPP[j]++;
-        //         }
-        //     }
-        // }
-        printPP();
+        printPP(HPP, VPP);
     };
-    void printPP(){
-        cout << "\nHPP: ";
+
+    void printPP(int* Harr, int* Varr){
+        cout << "\nHOR: ";
         for(int i= 0; i< numRows; i++){
-            cout<< HPP[i] << " ";
+            cout<< Harr[i] << " ";
         };
-        cout << "\nVPP: ";
+        cout << "\nVER: ";
         for(int j=0; j< numCols; j++){
-            cout<< VPP[j] << " ";
+            cout<< Varr[j] << " ";
         }
         cout << "\n";
+    };
+
+    void thresholding(){
+        for(int i= 0; i< numRows; i++){
+            if(HPP[i]< threshold) HPPbin[i] = 0;
+            else HPPbin[i] = 1;
+        }
+        for(int i=0; i< numCols;i++){
+            if(VPP[i]< threshold) VPPbin[i] = 0;
+            else VPPbin[i] = 1;
+        }
+        printPP(HPPbin, VPPbin);
     }
 };
 class BBox{
@@ -197,6 +200,7 @@ int main(int argc, char *argv[]){
     boxNode* box=new boxNode(1,0,0,42,31);
     processor.loadImage();
     processor.computePP(box);
-    // BBox::findImgBox(processor.imageAry,processor.numRows, processor.numCols); //image box
+    BBox::findImgBox(processor.imageAry,processor.numRows, processor.numCols); //image box
+    processor.thresholding();
     free(box);
 };
