@@ -1,0 +1,273 @@
+Project 9: Document text-line detection using Projection Profiles.
+What you need to do for this project: 
+
+Given a binary document image.
+	1) You are to compute the bounding box, called imgBox, 
+         that encloses all objects (1's) in the entire image.
+			
+	2) You are to compute the Horizontal Projection Profile (HPP) and 
+	   the Vertical Projection Profile (VPP) within imgBox of the image.
+	   		
+	3) Output the HPP to outFile with proper heading.
+			
+	4) Output the VPP to outFile with proper heading.
+
+     5) You are to threshold both HPP and VPP, using a given thr_value to convert
+        HPP and VPP to binary, call HPPBinary and VPPBinary.
+
+	6) Output the HPPBinary to outFile with proper heading.
+
+	7) Output the VPPBinary to outFile with proper heading.
+
+     8) Using HPPBinary and VPPBinary, you are to determine the reading direction of the input image.
+		
+	9) Output the reading direction to outFile with proper heading.
+
+	10) Output the imgBox to outFile  
+			box format:  
+				1  // as the entire image
+				minRow minCol maxRow 	maxCol
+
+	11) Base on the reading direction, you are to compute the text-line bounding boxes from
+	   HPPBinary (if reading is horizhontal) or from VPPBinary (if reading is vertical)
+ 
+  		Output each text-line box. box format:  
+				1.1  // first text line
+				minRow minCol maxRow 	maxCol
+       			1.2  // second text line
+				minRow minCol maxRow 	maxCol
+				1.3  // third text line
+				minRow minCol maxRow 	maxCol
+				:
+				:
+       			1.n  // nth text line
+				minRow minCol maxRow 	maxCol
+
+**************************************
+Language: C++ 
+Due Date:  Soft copy: 12/10/2017 Sunday before midnight
+	(+1 for early submission deadline 12/7/2017 Thursday before midnight
+Due Date:  Hard copy: 12/12/2017 Tuesday in class before exam 
+
+*************************************
+
+I. Input-1 (argv[1]): A binary image.
+   Input-2: argv[2]: a threshold value, try 2 for this project.
+     
+II. OutFile (argv[3]): Write all the outputs. 
+
+*******************************
+III. Data structure: 
+*******************************
+*** You may design on your own data structure or modify  the followings.
+
+- an imagePP class:
+     // make it a friend to any class who needs it.
+
+	- numRows (int)
+	- numCols (int)
+	- minVal (int)
+	- maxVal (int)
+ 
+	- imgAry (int **) a 2D array, need to dynamically allocate at run time
+			of size numRows by numCols.
+
+	- HPP(int *) 
+				// a 1-D array to store the horizontal projection profile, 
+				// need to dynamically allocate at run time
+				// of size is numRows  and initallize to 0.
+ 	- HPPbin(int *) 
+				// a 1-D array to store the binarized horizontal projection profile, 
+				// need to dynamically allocate at run time
+				// of size is numRows  
+	- VPP(int *) 
+				// a 1-D array to store the vertical projection profile, 
+				// need to dynamically allocate at run time
+				// of size is numCols  and initallize to 0.
+	- VPPbin(int *) 
+				// a 1-D array to store the binarized vertical projection profile, 
+				// need to dynamically allocate at run time
+				// of size is numCols
+	- methods:
+		- constructor(s) // need to dynamically allocate all arrays; 
+				and assign values to numRows,..., etc.
+
+		- loadImage (..) // read from input file and load zeroFramedAry begin at (1,1)
+	
+		- computeHPP (boxNode) // compute the horizontal projection profile 
+						//within the given bounding box on the image.
+
+		- computeVPP (boxNode) // compute the vertical projection profile 
+						// within the given bounding box on the image.
+	
+		- threshold(inPP,thrVal,thrPP) // threshold on the given projection profile, inPP using the thrVal
+					    // (if inPP(i,j) < thrVal) thrPP(i,j) set to 0, else set thrPP(i,j) to 1
+
+		- printPP (PP) // print the given projection profile
+
+
+  - a BBox class // bounding box
+		- a boxNode struct 
+			//the coordinates of upper-left and lower right corners of the bounding box
+			- type (int) // 1 for img box, 2 for text-line box, 3 for text-word box, etc.
+			- minRow (int)
+			- minCol (int)
+			- maxRow (int)
+			- minCol (int)
+	     		- nextBox (boxNode*) // points to the bounding box at the same level in the hirarchy
+			
+ 		- a boxList class
+			- listHead (boxNode*) // initally point to a dummy node
+			- last (boxNode*) // points to the last node in the list, initally point to dummy node
+		
+			method:
+			 -insert (L, Box) // insert the box at the end of the list L.
+				// L.last.next <-- box.
+
+		
+		- imgBox (boxNode) 
+		- textLineBoxList (boxList) //points to a linked list that maintains a list of
+					   // text-line bounding boxes.
+
+		- findImgBox (...) // finds the bounding box of area that enclosed all objects in the image.
+				   // returns the boxNode pointer to imgBox.
+ 		 
+		- findLineBoxes(PP) 
+					// given PP, find the bounding box of text-line, one-by-one in PP 
+					// and insert each ext-line box at the end of list. 
+				- findWordBox(PP)  
+		- printBox(Box) // print the bounding box info of given Box
+
+		- printBoxList (List) // Call printBox to print each box in the entire list
+
+*******************************
+III. Suggusted Algorithm steps 
+*******************************
+   
+*** You may design your own algorithm steps or modify the following steps.
+
+step 0: read the image header
+	   imgAry <-- dynamically allocate imgAry
+	  thr <-- get from input
+
+step 1: loadImage
+step 2: imgBox <-- findImgBox (imgAry) 
+	   output imgBox to outfile
+ 
+step 3: computeHPP (imgAry,imgBox)
+	   threshold(HPP,thrHPP, thr)  
+	   computeVPP (imgAry,imgBox)
+	   threshold(VPP,thrVPP, thr)
+  
+step 4: dir <-- findReadingDir(thrHPP, thrVPP)
+	
+step 5: if dir is 1 output "Horizontal reading direction" to outfile.
+		if dir is 2 output "Vertical reading direction" to outfile.
+
+step 6: listHead <-- findLineBoxes(imgBox,thrPP)
+		
+step 7. printBoxList (listHead) 
+
+step 8: closed all files.
+ 
+
+*******************************
+IV. Algorithm for findImgBox (imgAry) 
+*******************************
+*** You may design your own algorithm steps or modify  the following steps.
+
+step 0: box <-- an boxNode object
+        initallize all members of box accordingly
+
+step 1: scan the  L-R and T-B
+
+step 2: if p(i,j) > 0
+        compare i and j with box's maxRow, minRow, maxCol and minCol
+        update them if necessary
+
+step 3: repeat step 1 and step 2 until all pixels are processed
+
+step 4: return box
+
+*******************************
+IV. Algorithm for findReadingDir(thrHPP, thrVPP)
+
+*******************************
+*** You may design your own algorithm steps or modify  the following steps.
+
+step 1: HPPboxCt <-- countBoxes (thrHPP)
+
+step 2: VPPboxCT <-- countBoxes (thrVPP)
+
+step 3: if HPPboxCt > VPPboxCT // a lot of assumption here!!
+	     return 1  // horizontal reading direction
+        else
+		return 2  // vertical reading direction
+
+*******************************
+IV. Algorithm for countBoxes (PP)
+
+*******************************
+*** You may design our own algorithm steps or modify  the following steps.
+
+
+step 1: index <-- 0
+	  boxCount <-- 0
+
+	// skiping all 0's
+step 2: if PP(index) <= 0
+        	index ++
+step 3: repeat step 2 while HPP(index) <= 0 
+	
+	// skiping all 1's
+step 4: if PP(index) > 0
+        	index ++
+step 5: repeat step 4 while PP(index)> 0
+
+step 6: boxCount++
+	
+step 7: repeat step 2 to step 6 until at the end of PP array.
+
+step 8: return boxCount
+
+
+*******************************
+IV. Algorithm for findLineBoxes(imgBox, PP)
+
+*******************************
+*** You may design on your own algorithm steps or modify  the following steps.
+
+
+step 0: boxHead <-- create a *boxList* object
+                              
+        initallize boxHead.listHead to a dummy boxNode adn
+	   boxHead.last to the same dummy node.
+
+step 1: index <-- 0
+
+	// skip all 0's
+step 2: if PP(index) <= 0
+        	index ++
+step 3: repeat step 2 while PP(index) <= 0 
+	
+step 4: minRow <-- index
+	   
+	// skip all 1's
+step 5: if PP(index) > 0
+        	index ++
+step 6: repeat step 5 while PP(index) > 0
+
+step 7: maxRow <-- index -1
+
+	// one line box found
+step 8: newBox <-- create an boxNode object
+	   newBox.minCol <-- imgBox.minCol
+	   newBox.maxCol <- imgBox.MaxCol
+	   newBox.minRow <-- minRow
+	   newBox.maxRow <- minCol
+
+step 9: insert (boxHead, newBox) // insert newBox at the back of boxHead linked list.
+
+step 10: repeat step 2 to step 9 until at the end of PP array.
+
+step 11: return boxHead
