@@ -89,11 +89,11 @@ class imagePP
         }
     }
 
-    void computePP(boxNode &box)
+    void computePP(boxNode *&box)
     { //compuyte VPP and HPP combined
-        for (int i = box.minRow; i < box.maxRow; i++)
+        for (int i = box->minRow; i < box->maxRow; i++)
         {
-            for (int j = box.minCol; j < box.maxCol; j++)
+            for (int j = box->minCol; j < box->maxCol; j++)
             {
                 if (imageAry[i][j] > 0)
                 {
@@ -315,7 +315,7 @@ class BBox
     };
 
     //update the bouding box of the image if new max for row and col are found
-    static void compare(boxNode &box, const int row, const int col)
+    static void compare(boxNode box, const int row, const int col)
     {
         if (row < box.minRow)
             box.minRow = row;
@@ -327,7 +327,7 @@ class BBox
             box.maxCol = col;
     };
 
-    boxList findLineBoxesHorizontal(boxNode &imgBox, string dir, int *PP, const int PPSize)
+    boxList findLineBoxesHorizontal(string dir, int *PP, const int PPSize)
     {
         int minRow, maxRow = 0;
         boxList boxHead;
@@ -344,14 +344,14 @@ class BBox
                     index++;
                 maxRow = index - 1; // found the last starting point :row
 
-                boxNode *newBox = new boxNode(2, minRow, imgBox.minCol, maxRow, imgBox.maxCol);
+                boxNode *newBox = new boxNode(2, minRow, imgBox->minCol, maxRow, imgBox->maxCol);
                 boxHead.insertLast(newBox);
             };
         }
         return boxHead;
     };
 
-    boxList findLineBoxesVertical(boxNode imgBox, int *PP, const int PPSize)
+    boxList findLineBoxesVertical(int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;
         boxList boxHead;
@@ -368,7 +368,7 @@ class BBox
                     index++;
                 maxCol = index - 1; // found the last starting point :row
 
-                boxNode *newBox = new boxNode(2, imgBox.minRow, minCol, imgBox.maxRow, maxCol);
+                boxNode *newBox = new boxNode(2, imgBox->minRow, minCol, imgBox->maxRow, maxCol);
                 boxHead.insertLast(newBox);
             };
         }
@@ -383,10 +383,10 @@ int main(int argc, char *argv[])
     textImage.loadImage();
 
     //find text image bouding box
-    boxNode box = BBox::findImgBox(textImage.imageAry, textImage.numRows, textImage.numCols); //image box
+    boxNode box = Box::findImgBox(textImage.imageAry, textImage.numRows, textImage.numCols); //image box
 
     // compute HPP and VPP
-    textImage.computePP(box);
+    textImage.computePP(box.imgBox);
 
     cout << "After threshold";
     //thresholding HPP and VPP with user input

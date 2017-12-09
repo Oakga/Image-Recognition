@@ -351,7 +351,7 @@ class BBox
         return boxHead;
     };
 
-    boxList findLineBoxesVertical(boxNode imgBox, int *PP, const int PPSize)
+    boxList findLineBoxesVertical(boxNode box, int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;
         boxList boxHead;

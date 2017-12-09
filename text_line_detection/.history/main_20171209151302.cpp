@@ -89,11 +89,11 @@ class imagePP
         }
     }
 
-    void computePP(boxNode &box)
+    void computePP(boxNode *&box)
     { //compuyte VPP and HPP combined
-        for (int i = box.minRow; i < box.maxRow; i++)
+        for (int i = box->minRow; i < box->maxRow; i++)
         {
-            for (int j = box.minCol; j < box.maxCol; j++)
+            for (int j = box->minCol; j < box->maxCol; j++)
             {
                 if (imageAry[i][j] > 0)
                 {
@@ -187,11 +187,12 @@ class imagePP
         };
 
         //counting
-        int index, boxCount, counterZero, counterOne;
-        index = boxCount = 0;
+        int index, boxCount, counterZero, counterOne = 0;
+        int index = 0;
         do
         {
             counterZero = counterOne = 0;
+            cout << arrBin[index] << endl;
             while (arrBin[index] <= 0)
             {
                 index++;
@@ -217,15 +218,15 @@ class BBox
     friend class imagePP;
 
   public:
-    // boxNode *imgBox;
-    // BBox()
-    // {
-    //     imgBox = NULL;
-    // }
-    // ~BBox()
-    // {
-    //     free(imgBox);
-    // }
+    boxNode *imgBox;
+    BBox()
+    {
+        imgBox = NULL;
+    }
+    ~BBox()
+    {
+        free(imgBox);
+    }
     class boxList
     {
       public:
@@ -288,10 +289,9 @@ class BBox
         }
     };
 
-    static boxNode findImgBox(int **&imgAry, const int numRows, const int numCols)
+    boxNode *findImgBox(int **&imgAry, const int numRows, const int numCols)
     {
         bool firstTime = true;
-        boxNode box;
         for (int i = 0; i < numRows; i++)
         {
             for (int j = 0; j < numCols; j++)
@@ -302,32 +302,31 @@ class BBox
                     if (firstTime == true)
                     {
                         firstTime = false;
-                        box.minRow = box.maxRow = i;
-                        box.minCol = box.maxCol = j;
+                        imgBox = new boxNode(1, i, j, i, j);
                     };
                     //otherwise update the object
-                    compare(box, i, j);
+                    compare(imgBox, i, j);
                 };
             };
         };
-        box.printbox();
-        return box;
+        imgBox->printbox();
+        return imgBox;
     };
 
     //update the bouding box of the image if new max for row and col are found
-    static void compare(boxNode &box, const int row, const int col)
+    void compare(boxNode *&imgBox, const int row, const int col)
     {
-        if (row < box.minRow)
-            box.minRow = row;
-        if (row > box.maxRow)
-            box.maxRow = row;
-        if (col < box.minCol)
-            box.minCol = col;
-        if (col > box.maxCol)
-            box.maxCol = col;
+        if (row < imgBox->minRow)
+            imgBox->minRow = row;
+        if (row > imgBox->maxRow)
+            imgBox->maxRow = row;
+        if (col < imgBox->minCol)
+            imgBox->minCol = col;
+        if (col > imgBox->maxCol)
+            imgBox->maxCol = col;
     };
 
-    boxList findLineBoxesHorizontal(boxNode &imgBox, string dir, int *PP, const int PPSize)
+    boxList findLineBoxesHorizontal(string dir, int *PP, const int PPSize)
     {
         int minRow, maxRow = 0;
         boxList boxHead;
@@ -344,14 +343,14 @@ class BBox
                     index++;
                 maxRow = index - 1; // found the last starting point :row
 
-                boxNode *newBox = new boxNode(2, minRow, imgBox.minCol, maxRow, imgBox.maxCol);
+                boxNode *newBox = new boxNode(2, minRow, imgBox->minCol, maxRow, imgBox->maxCol);
                 boxHead.insertLast(newBox);
             };
         }
         return boxHead;
     };
 
-    boxList findLineBoxesVertical(boxNode imgBox, int *PP, const int PPSize)
+    boxList findLineBoxesVertical(int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;
         boxList boxHead;
@@ -368,7 +367,7 @@ class BBox
                     index++;
                 maxCol = index - 1; // found the last starting point :row
 
-                boxNode *newBox = new boxNode(2, imgBox.minRow, minCol, imgBox.maxRow, maxCol);
+                boxNode *newBox = new boxNode(2, imgBox->minRow, minCol, imgBox->maxRow, maxCol);
                 boxHead.insertLast(newBox);
             };
         }
@@ -379,14 +378,14 @@ int main(int argc, char *argv[])
 {
     //intializations
     imagePP textImage(argv[1], argv[2], argv[3]);
-    
+    BBox box;
     textImage.loadImage();
 
     //find text image bouding box
-    boxNode box = BBox::findImgBox(textImage.imageAry, textImage.numRows, textImage.numCols); //image box
+    box.findImgBox(textImage.imageAry, textImage.numRows, textImage.numCols); //image box
 
     // compute HPP and VPP
-    textImage.computePP(box);
+    textImage.computePP(box.imgBox);
 
     cout << "After threshold";
     //thresholding HPP and VPP with user input
@@ -400,6 +399,7 @@ int main(int argc, char *argv[])
     else
         Readingdir = "vertical";
     cout << "\nReading DIR:" << Readingdir << "\n";
+    cout << "\nGoing through each line";
     };
     //find text-line bouding boxes
 //     if (Readingdir == "horizontal")

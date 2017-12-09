@@ -89,11 +89,11 @@ class imagePP
         }
     }
 
-    void computePP(boxNode &box)
+    void computePP(boxNode *&box)
     { //compuyte VPP and HPP combined
-        for (int i = box.minRow; i < box.maxRow; i++)
+        for (int i = box->minRow; i < box->maxRow; i++)
         {
-            for (int j = box.minCol; j < box.maxCol; j++)
+            for (int j = box->minCol; j < box->maxCol; j++)
             {
                 if (imageAry[i][j] > 0)
                 {
@@ -102,10 +102,7 @@ class imagePP
                 }
             }
         }
-
-        //printing
-        printPP(HPP, numRows, "HOR");
-        printPP(VPP, numCols, "VER");
+        // printPP(HPP, VPP);
     };
 
     void clearArrays()
@@ -116,9 +113,15 @@ class imagePP
         memset(VPP, 0, sizeof(int) * numCols);
     };
 
+    void printPP(int *Harr, int *Varr)
+    {
+        printPPHorizontal(Harr);
+        printPPVertical(Varr);
+    };
+
     void printPP(int *arr, int size, string name)
     {
-        cout << "\n" << name << ":";
+        cout << "\n "<< name << ":";
         for (int j = 0; j < size; j++)
         {
             cout << arr[j] << " ";
@@ -126,43 +129,42 @@ class imagePP
         cout << "\n";
     };
 
-    void thresholding(const int size)
-    {
-        //check which array we want to threshold i.e VPP or HPP
-        int *arr;
-        int *arrBin;
-        string arrName;
-        if (size == numRows)
-        {
-            arr = HPP;
-            arrBin = HPPbin;
-            arrName = "HOR";
+    void threshold(int size){
+        int* arr, arrBin;
+        if(size == numRows) {
+             arr = HPP;
+             arrBin = HPPbin;
         }
-        else
-        {
+        else { 
             arr = VPP;
             arrBin = VPPbin;
-            arrName = "VER";
-        };
-
-        //thresholding
+        }
         for (int i = 0; i < size; i++)
         {
-            if (arr[i] < threshold)
-                arrBin[i] = 0;
+            if (HPP[i] < threshold)
+                HPPbin[i] = 0;
             else
-                arrBin[i] = 1;
+                HPPbin[i] = 1;
         }
+        printPP(HPPbin, );
+    }
 
-        //printing
-        printPP(arrBin, size, arrName);
+    void thresholdVertical()
+    {
+        for (int i = 0; i < numCols; i++)
+        {
+            if (VPP[i] < threshold)
+                VPPbin[i] = 0;
+            else
+                VPPbin[i] = 1;
+        }
+        printPPVertical(VPPbin);
     }
 
     int findReadingDir()
     {
-        int HPPboxCt = countBoxes(numRows);
-        // int VPPboxCt = countBoxes(numCols);
-        int VPPboxCt = 5;
+        int HPPboxCt = countBoxesHorizontal();
+        int VPPboxCt = countBoxesVertical();
         printf("\nBOXCOUNT H: %u V: %u", HPPboxCt, VPPboxCt);
         if (HPPboxCt > VPPboxCt)
             return 1; // horinzontal
@@ -170,45 +172,61 @@ class imagePP
             return 0; //vertical
     }
 
-    int countBoxes(const int size)
+    int countBoxesHorizontal()
     {
-        //check which array we want to count i.e VPPbin or HPPbin
-        int *arrBin;
-        string arrName;
-        if (size == numRows)
-        {
-            arrBin = HPPbin;
-            arrName = "HOR";
-        }
-        else
-        {
-            arrBin = VPPbin;
-            arrName = "VER";
-        };
-
-        //counting
-        int index, boxCount, counterZero, counterOne;
-        index = boxCount = 0;
+        int index = 0;
+        int boxCount = 0;
+        int counterZero = 0;
+        int counterOne = 0;
         do
         {
-            counterZero = counterOne = 0;
-            while (arrBin[index] <= 0)
+            counterZero = 0;
+            counterOne = 0;
+            while (HPPbin[index] <= 0)
             {
                 index++;
                 counterZero++;
             };
-            //make sure no overflow
-            if (index < size)
+            if (index < numRows)
             {
-                while (arrBin[index] > 0)
+                while (HPPbin[index] > 0)
                 {
                     index++;
                     counterOne++;
                 }
             }
-            // this ensure that each boxes are regex [ 0 0* 1 1* ]
-            if (counterZero > 0 && counterOne > 0) boxCount++;
-        } while (index < size);
+            if (counterZero > 0 && counterOne > 0)
+                boxCount++;
+        } while (index < numRows);
+        return boxCount;
+    }
+
+    int countBoxesVertical()
+    {
+        int index = 0;
+        int boxCount = 0;
+        int counterZero = 0;
+        int counterOne = 0;
+        do
+        {
+            counterZero = 0;
+            counterOne = 0;
+            while (VPPbin[index] <= 0)
+            {
+                index++;
+                counterZero++;
+            };
+            if (index < numCols)
+            {
+                while (VPPbin[index] > 0)
+                {
+                    index++;
+                    counterOne++;
+                }
+            }
+            if (counterZero > 0 && counterOne > 0)
+                boxCount++;
+        } while (index < numCols);
         return boxCount;
     }
 };
@@ -217,15 +235,15 @@ class BBox
     friend class imagePP;
 
   public:
-    // boxNode *imgBox;
-    // BBox()
-    // {
-    //     imgBox = NULL;
-    // }
-    // ~BBox()
-    // {
-    //     free(imgBox);
-    // }
+    boxNode *imgBox;
+    BBox()
+    {
+        imgBox = NULL;
+    }
+    ~BBox()
+    {
+        free(imgBox);
+    }
     class boxList
     {
       public:
@@ -288,46 +306,50 @@ class BBox
         }
     };
 
-    static boxNode findImgBox(int **&imgAry, const int numRows, const int numCols)
+    boxNode *findImgBox(int **&imgAry, const int numRows, const int numCols)
     {
         bool firstTime = true;
-        boxNode box;
         for (int i = 0; i < numRows; i++)
         {
             for (int j = 0; j < numCols; j++)
             {
                 if (imgAry[i][j] > 0)
                 {
-                    // intialized the imgBox class object if first time
                     if (firstTime == true)
                     {
                         firstTime = false;
-                        box.minRow = box.maxRow = i;
-                        box.minCol = box.maxCol = j;
+                        imgBox = new boxNode(1, i, j, i, j);
                     };
-                    //otherwise update the object
-                    compare(box, i, j);
+                    compare(imgBox, i, j);
                 };
             };
         };
-        box.printbox();
-        return box;
+        imgBox->printbox();
+        return imgBox;
     };
 
     //update the bouding box of the image if new max for row and col are found
-    static void compare(boxNode &box, const int row, const int col)
+    void compare(boxNode *&imgBox, const int row, const int col)
     {
-        if (row < box.minRow)
-            box.minRow = row;
-        if (row > box.maxRow)
-            box.maxRow = row;
-        if (col < box.minCol)
-            box.minCol = col;
-        if (col > box.maxCol)
-            box.maxCol = col;
+        if (row < imgBox->minRow)
+        {
+            imgBox->minRow = row;
+        };
+        if (row > imgBox->maxRow)
+        {
+            imgBox->maxRow = row;
+        };
+        if (col < imgBox->minCol)
+        {
+            imgBox->minCol = col;
+        };
+        if (col > imgBox->maxCol)
+        {
+            imgBox->maxCol = col;
+        };
     };
 
-    boxList findLineBoxesHorizontal(boxNode &imgBox, string dir, int *PP, const int PPSize)
+    boxList findLineBoxesHorizontal(int *PP, const int PPSize)
     {
         int minRow, maxRow = 0;
         boxList boxHead;
@@ -344,14 +366,14 @@ class BBox
                     index++;
                 maxRow = index - 1; // found the last starting point :row
 
-                boxNode *newBox = new boxNode(2, minRow, imgBox.minCol, maxRow, imgBox.maxCol);
+                boxNode *newBox = new boxNode(2, minRow, imgBox->minCol, maxRow, imgBox->maxCol);
                 boxHead.insertLast(newBox);
             };
         }
         return boxHead;
     };
 
-    boxList findLineBoxesVertical(boxNode imgBox, int *PP, const int PPSize)
+    boxList findLineBoxesVertical(int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;
         boxList boxHead;
@@ -368,30 +390,33 @@ class BBox
                     index++;
                 maxCol = index - 1; // found the last starting point :row
 
-                boxNode *newBox = new boxNode(2, imgBox.minRow, minCol, imgBox.maxRow, maxCol);
+                boxNode *newBox = new boxNode(2, imgBox->minRow, minCol, imgBox->maxRow, maxCol);
                 boxHead.insertLast(newBox);
             };
         }
         return boxHead;
+    };
+
+    void findWordBoxes(int *PP, const int PPSize){
+
     };
 };
 int main(int argc, char *argv[])
 {
     //intializations
     imagePP textImage(argv[1], argv[2], argv[3]);
-    
+    BBox box;
     textImage.loadImage();
 
     //find text image bouding box
-    boxNode box = BBox::findImgBox(textImage.imageAry, textImage.numRows, textImage.numCols); //image box
+    box.findImgBox(textImage.imageAry, textImage.numRows, textImage.numCols); //image box
 
     // compute HPP and VPP
-    textImage.computePP(box);
+    textImage.computePP(box.imgBox);
 
     cout << "After threshold";
     //thresholding HPP and VPP with user input
-    textImage.thresholding(textImage.numRows);
-    textImage.thresholding(textImage.numCols);
+    textImage.thresholding();
 
     //determine reading dir
     string Readingdir;
@@ -400,41 +425,41 @@ int main(int argc, char *argv[])
     else
         Readingdir = "vertical";
     cout << "\nReading DIR:" << Readingdir << "\n";
-    };
+    cout << "\nGoing through each line";
     //find text-line bouding boxes
-//     if (Readingdir == "horizontal")
-//     {
-//         BBox::boxList lineList = box.findLineBoxesHorizontal(textImage.HPPbin, textImage.numRows);
-//         lineList.printList();
-//         BBox::boxList wordList;
-//         boxNode *lineWalker = lineList.listHead->nextBox;
-//         while (lineWalker != 0)
-//         {
-//             textImage.clearArrays();
-//             lineWalker->printbox();
-//             textImage.computePP(lineWalker);
-//             textImage.thresholdVertical();
-//             lineWalker = lineWalker->nextBox;
+    if (Readingdir == "horizontal")
+    {
+        BBox::boxList lineList = box.findLineBoxesHorizontal(textImage.HPPbin, textImage.numRows);
+        lineList.printList();
+        BBox::boxList wordList;
+        boxNode *lineWalker = lineList.listHead->nextBox;
+        while (lineWalker != 0)
+        {
+            textImage.clearArrays();
+            lineWalker->printbox();
+            textImage.computePP(lineWalker);
+            textImage.thresholdVertical();
+            lineWalker = lineWalker->nextBox;
 
-//             cout << endl;
-//         }
-//         free(lineWalker);
-//     }
-//     else
-//     {
-//         BBox::boxList lineList = box.findLineBoxesVertical(textImage.VPPbin, textImage.numCols);
-//         lineList.printList();
-//         textImage.clearArrays();
-//         boxNode *lineWalker = lineList.listHead->nextBox;
-//         while (lineWalker != 0)
-//         {
-//             textImage.clearArrays();
-//             lineWalker->printbox();
-//             textImage.computePP(lineWalker);
-//             textImage.thresholdHorizontal();
-//             lineWalker = lineWalker->nextBox;
-//             cout << endl;
-//         }
-//         free(lineWalker);
-//     };
-// };
+            cout << endl;
+        }
+        free(lineWalker);
+    }
+    else
+    {
+        BBox::boxList lineList = box.findLineBoxesVertical(textImage.VPPbin, textImage.numCols);
+        lineList.printList();
+        textImage.clearArrays();
+        boxNode *lineWalker = lineList.listHead->nextBox;
+        while (lineWalker != 0)
+        {
+            textImage.clearArrays();
+            lineWalker->printbox();
+            textImage.computePP(lineWalker);
+            textImage.thresholdHorizontal();
+            lineWalker = lineWalker->nextBox;
+            cout << endl;
+        }
+        free(lineWalker);
+    };
+};

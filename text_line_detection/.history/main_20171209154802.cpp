@@ -344,14 +344,14 @@ class BBox
                     index++;
                 maxRow = index - 1; // found the last starting point :row
 
-                boxNode *newBox = new boxNode(2, minRow, imgBox.minCol, maxRow, imgBox.maxCol);
+                boxNode *newBox = new boxNode(2, minRow, imgBox->minCol, maxRow, imgBox->maxCol);
                 boxHead.insertLast(newBox);
             };
         }
         return boxHead;
     };
 
-    boxList findLineBoxesVertical(boxNode imgBox, int *PP, const int PPSize)
+    boxList findLineBoxesVertical(int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;
         boxList boxHead;
@@ -368,7 +368,7 @@ class BBox
                     index++;
                 maxCol = index - 1; // found the last starting point :row
 
-                boxNode *newBox = new boxNode(2, imgBox.minRow, minCol, imgBox.maxRow, maxCol);
+                boxNode *newBox = new boxNode(2, imgBox->minRow, minCol, imgBox->maxRow, maxCol);
                 boxHead.insertLast(newBox);
             };
         }
