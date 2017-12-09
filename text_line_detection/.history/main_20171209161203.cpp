@@ -30,13 +30,9 @@ struct boxNode
         maxRow = maxRow_;
         maxCol = maxCol_;
     };
-    void printbox(bool skipLine)
+    void printbox()
     {
-        if(skipLine){
         printf("\nBOX: %u %u %u %u %u ", type, minRow, minCol, maxRow, maxCol);
-        }
-        else printf("BOX: %u %u %u %u %u ", type, minRow, minCol, maxRow, maxCol);
-
     };
 };
 class imagePP
@@ -165,7 +161,8 @@ class imagePP
     int findReadingDir()
     {
         int HPPboxCt = countBoxes(numRows);
-        int VPPboxCt = countBoxes(numCols);
+        // int VPPboxCt = countBoxes(numCols);
+        int VPPboxCt = 5;
         printf("\nBOXCOUNT H: %u V: %u", HPPboxCt, VPPboxCt);
         if (HPPboxCt > VPPboxCt)
             return 1; // horinzontal
@@ -258,7 +255,7 @@ class BBox
             while (spot != 0)
             {
                 cout << "(";
-                spot->printbox(false);
+                spot->printbox();
                 cout << ") -->";
                 spot = spot->nextBox;
             }
@@ -313,7 +310,7 @@ class BBox
                 };
             };
         };
-        box.printbox(true);
+        box.printbox();
         return box;
     };
 
@@ -330,15 +327,7 @@ class BBox
             box.maxCol = col;
     };
 
-    /* for example: if reading dir is horizontal, we need HPP for line boxes
-    column is consistant, row will be changing for each line
-    and dirOfPP in this case will be dirOfPP of PP and thus, dirOfPP is 1
-    in summary:
-    if PP is  VPPbin , dirOfPP is 0 
-    if PP is  HPPbin, dirOfPP is 1 
-    or what is changing? line? row? dirOfPP is 1? HPP
-    */
-    static boxList findLineBoxes(boxNode &imgBox, const int dirOfPP, int *PP, const int PPSize)
+    boxList findLineBoxes(boxNode &imgBox, const int dir, int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;
         int minRow, maxRow = 0;
@@ -351,7 +340,7 @@ class BBox
                 index++;
             
             //found starting point
-            if( dirOfPP == 1) minRow = index;  //given PP is HPPbin and dirOfPP 1 is horizontal
+            if( dir == 1) minRow = index;  //given PP is HPPbin and dir 1 is horizontal
             else minCol = index;
 
             //avoid overflow
@@ -361,32 +350,46 @@ class BBox
                 while (PP[index] > 0)
                     index++;
                 
-                // found the last point of the boundary: bounding box is now complete
-                if( dirOfPP == 1) { 
-                    maxRow = index - 1; 
-                    // col is consistant
-                    boxNode *newBox = new boxNode(2, minRow, imgBox.minCol, maxRow, imgBox.maxCol);
-                    boxHead.insertLast(newBox);
-                }
-                else { 
-                    maxCol = index;
-                    //row is consistant
-                    boxNode *newBox = new boxNode(2, imgBox.minRow, minCol, imgBox.maxRow, maxCol);
-                    boxHead.insertLast(newBox);
-                }
+                // found the last starting point :row
+                if( dir == 1) maxRow = index - 1; 
+                else maxCol = index;
+                
+                boxNode *newBox = new boxNode(2, minRow, imgBox.minCol, maxRow, imgBox.maxCol);
+                boxHead.insertLast(newBox);
             };
         }
+        return boxHead;
+    };
 
-        boxHead.printList();
+    boxList findLineBoxesVertical(boxNode imgBox, int *PP, const int PPSize)
+    {
+        int minCol, maxCol = 0;
+        boxList boxHead;
+        int index = 0;
+        while (index < PPSize)
+        {
+
+            while (PP[index] <= 0)
+                index++;
+            minCol = index; // found first starting point : row
+            if (index < PPSize)
+            {
+                while (PP[index] > 0)
+                    index++;
+                maxCol = index - 1; // found the last starting point :row
+
+                boxNode *newBox = new boxNode(2, imgBox.minRow, minCol, imgBox.maxRow, maxCol);
+                boxHead.insertLast(newBox);
+            };
+        }
         return boxHead;
     };
 };
 int main(int argc, char *argv[])
 {
     //intializations
-    string dirInEng;
-    int readingDir;
     imagePP textImage(argv[1], argv[2], argv[3]);
+    
     textImage.loadImage();
 
     //find text image bouding box
@@ -395,24 +398,20 @@ int main(int argc, char *argv[])
     // compute HPP and VPP
     textImage.computePP(box);
 
+    cout << "After threshold";
     //thresholding HPP and VPP with user input
     textImage.thresholding(textImage.numRows);
     textImage.thresholding(textImage.numCols);
 
-    //determine reading dirOfPP
-    readingDir = textImage.findReadingDir();
-    if (readingDir == 1) dirInEng = "horizontal";
-    else dirInEng = "vertical";
-    cout << "\nReading DIR:" << dirInEng << "\n";
+    //determine reading dir
+    string Readingdir;
+    if (textImage.findReadingDir() == 1) Readingdir = "horizontal";
+    else Readingdir = "vertical";
+    cout << "\nReading DIR:" << Readingdir << "\n";
     //find text-line bouding boxes
-    if (readingDir == 0)
+    if (Readingdir == "horizontal")
     {
-        BBox::boxList lineList = BBox::findLineBoxes(box, 0, textImage.VPPbin, textImage.numCols);
-    }
-    else {
-        BBox::boxList lineList = BBox::findLineBoxes(box, 1, textImage.HPPbin, textImage.numRows);
-    }
-};    
+        
 //         BBox::boxList lineList = box.findLineBoxesHorizontal(textImage.HPPbin, textImage.numRows);
 //         lineList.printList();
 //         BBox::boxList wordList;
@@ -447,3 +446,4 @@ int main(int argc, char *argv[])
 //         free(lineWalker);
 //     };
 // };
+};

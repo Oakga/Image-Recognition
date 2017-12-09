@@ -165,7 +165,8 @@ class imagePP
     int findReadingDir()
     {
         int HPPboxCt = countBoxes(numRows);
-        int VPPboxCt = countBoxes(numCols);
+        // int VPPboxCt = countBoxes(numCols);
+        int VPPboxCt = 5;
         printf("\nBOXCOUNT H: %u V: %u", HPPboxCt, VPPboxCt);
         if (HPPboxCt > VPPboxCt)
             return 1; // horinzontal
@@ -405,7 +406,7 @@ int main(int argc, char *argv[])
     else dirInEng = "vertical";
     cout << "\nReading DIR:" << dirInEng << "\n";
     //find text-line bouding boxes
-    if (readingDir == 0)
+    if (readingDir == 0) 
     {
         BBox::boxList lineList = BBox::findLineBoxes(box, 0, textImage.VPPbin, textImage.numCols);
     }

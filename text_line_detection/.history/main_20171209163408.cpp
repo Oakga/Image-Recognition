@@ -30,13 +30,9 @@ struct boxNode
         maxRow = maxRow_;
         maxCol = maxCol_;
     };
-    void printbox(bool skipLine)
+    void printbox()
     {
-        if(skipLine){
         printf("\nBOX: %u %u %u %u %u ", type, minRow, minCol, maxRow, maxCol);
-        }
-        else printf("BOX: %u %u %u %u %u ", type, minRow, minCol, maxRow, maxCol);
-
     };
 };
 class imagePP
@@ -165,7 +161,8 @@ class imagePP
     int findReadingDir()
     {
         int HPPboxCt = countBoxes(numRows);
-        int VPPboxCt = countBoxes(numCols);
+        // int VPPboxCt = countBoxes(numCols);
+        int VPPboxCt = 5;
         printf("\nBOXCOUNT H: %u V: %u", HPPboxCt, VPPboxCt);
         if (HPPboxCt > VPPboxCt)
             return 1; // horinzontal
@@ -258,7 +255,7 @@ class BBox
             while (spot != 0)
             {
                 cout << "(";
-                spot->printbox(false);
+                spot->printbox();
                 cout << ") -->";
                 spot = spot->nextBox;
             }
@@ -313,7 +310,7 @@ class BBox
                 };
             };
         };
-        box.printbox(true);
+        box.printbox();
         return box;
     };
 
@@ -395,6 +392,7 @@ int main(int argc, char *argv[])
     // compute HPP and VPP
     textImage.computePP(box);
 
+    cout << "After threshold";
     //thresholding HPP and VPP with user input
     textImage.thresholding(textImage.numRows);
     textImage.thresholding(textImage.numCols);
@@ -405,14 +403,23 @@ int main(int argc, char *argv[])
     else dirInEng = "vertical";
     cout << "\nReading DIR:" << dirInEng << "\n";
     //find text-line bouding boxes
-    if (readingDir == 0)
+    if (readingDir == 1)
     {
-        BBox::boxList lineList = BBox::findLineBoxes(box, 0, textImage.VPPbin, textImage.numCols);
+        BBox::boxList lineList = BBox::findLineBoxes(box, 0, textImage.VPPbin, textImage.numRows);
     }
     else {
         BBox::boxList lineList = BBox::findLineBoxes(box, 1, textImage.HPPbin, textImage.numRows);
     }
-};    
+
+
+
+
+
+
+
+
+
+        
 //         BBox::boxList lineList = box.findLineBoxesHorizontal(textImage.HPPbin, textImage.numRows);
 //         lineList.printList();
 //         BBox::boxList wordList;
@@ -447,3 +454,4 @@ int main(int argc, char *argv[])
 //         free(lineWalker);
 //     };
 // };
+};

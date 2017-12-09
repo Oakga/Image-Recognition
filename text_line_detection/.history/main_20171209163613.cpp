@@ -165,7 +165,8 @@ class imagePP
     int findReadingDir()
     {
         int HPPboxCt = countBoxes(numRows);
-        int VPPboxCt = countBoxes(numCols);
+        // int VPPboxCt = countBoxes(numCols);
+        int VPPboxCt = 5;
         printf("\nBOXCOUNT H: %u V: %u", HPPboxCt, VPPboxCt);
         if (HPPboxCt > VPPboxCt)
             return 1; // horinzontal
@@ -258,7 +259,7 @@ class BBox
             while (spot != 0)
             {
                 cout << "(";
-                spot->printbox(false);
+                spot->printbox(0);
                 cout << ") -->";
                 spot = spot->nextBox;
             }
@@ -313,7 +314,7 @@ class BBox
                 };
             };
         };
-        box.printbox(true);
+        box.printbox();
         return box;
     };
 
@@ -395,6 +396,7 @@ int main(int argc, char *argv[])
     // compute HPP and VPP
     textImage.computePP(box);
 
+    cout << "After threshold";
     //thresholding HPP and VPP with user input
     textImage.thresholding(textImage.numRows);
     textImage.thresholding(textImage.numCols);

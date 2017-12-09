@@ -165,7 +165,8 @@ class imagePP
     int findReadingDir()
     {
         int HPPboxCt = countBoxes(numRows);
-        int VPPboxCt = countBoxes(numCols);
+        // int VPPboxCt = countBoxes(numCols);
+        int VPPboxCt = 5;
         printf("\nBOXCOUNT H: %u V: %u", HPPboxCt, VPPboxCt);
         if (HPPboxCt > VPPboxCt)
             return 1; // horinzontal
