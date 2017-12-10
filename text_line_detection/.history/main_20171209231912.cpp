@@ -401,9 +401,6 @@ class BBox
         return boxHead;
     };
 
-    /* assuming you give me a line box with its respective PP
-    this will pump out each words in the line into the lineList given
-    */
     static void findWordBoxes(boxList lineList, boxNode *&lineBox, const int dirOfPP, int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;
@@ -470,6 +467,7 @@ int main(int argc, char *argv[])
     if (readingDir == 1) dirInEng = "horizontal";
     else dirInEng = "vertical";
     cout << "\nReading DIR:" << dirInEng << "\n";
+    
     //find text-line bouding boxes
     cout << "\nText Line Boxes:" <<endl;
     if (readingDir == 0)

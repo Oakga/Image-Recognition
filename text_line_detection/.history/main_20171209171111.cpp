@@ -93,49 +93,36 @@ class imagePP
         }
     }
 
-    //if compute both dir = 2, otherwise dir is direction you want to compute
+    //if compute both dir = 3, otherwise dir is direction you want to compute
     void computePP(boxNode *&box, const int dir)
     { 
-        //empty out the arrays that we going to use 
-        if(dir == 2){
-            memset(HPP, 0, sizeof(int) * numRows);
-            memset(HPPbin, 0, sizeof(int) * numRows);
-            memset(VPP, 0, sizeof(int) * numCols);
-            memset(VPP, 0, sizeof(int) * numCols);
-        }
-        else if(dir == 1){
-            memset(HPP, 0, sizeof(int) * numRows);
-            memset(HPPbin, 0, sizeof(int) * numRows);
-        }
-        else {
-            memset(VPP, 0, sizeof(int) * numCols);
-            memset(VPP, 0, sizeof(int) * numCols);
-        };
-
-        ///computation
         for (int i = box->minRow; i < box->maxRow; i++)
         {
             for (int j = box->minCol; j < box->maxCol; j++)
             {
                 if (imageAry[i][j] > 0)
                 {
-                    if(dir == 2) {
+                    if(dir == 3) {
                         HPP[i]++;
-                        VPP[j]++;
-                    }
+                        VPP[i]++;
+                    };
                     else if(dir == 1) HPP[i]++;
-                    else VPP[j]++;
+                    else VPP[i]++;
                 }
             }
         }
 
         //printing
-        if(dir == 2){
         printPP(HPP, numRows, "HOR");
         printPP(VPP, numCols, "VER");
-        }
-        else if (dir == 1) printPP(HPP, numRows, "HOR");
-        else printPP(VPP, numCols, "VER");
+    };
+
+    void clearArrays()
+    {
+        memset(HPP, 0, sizeof(int) * numRows);
+        memset(HPPbin, 0, sizeof(int) * numRows);
+        memset(VPP, 0, sizeof(int) * numCols);
+        memset(VPP, 0, sizeof(int) * numCols);
     };
 
     void printPP(int *arr, int size, string name)
@@ -384,14 +371,18 @@ class BBox
                     maxRow = index - 1; 
                     // col is consistant
                     boxNode *newLineBox = new boxNode(2, minRow, imgBox->minCol, maxRow, imgBox->maxCol);
-                    newLineBox->printbox(1);
                     boxHead.insertLast(newLineBox);
+
+                    /* for each new Line boxes we need to computePP again
+                    */
+                    img.clearArrays();
+                    img.computePP(newLineBox);
+                    
                 }
                 else { 
-                    maxCol = index - 1;
+                    maxCol = index;
                     //row is consistant
                     boxNode *newLineBox = new boxNode(2, imgBox->minRow, minCol, imgBox->maxRow, maxCol);
-                    newLineBox->printbox(1);
                     boxHead.insertLast(newLineBox);
                 }
             };
@@ -402,9 +393,9 @@ class BBox
     };
 
     /* assuming you give me a line box with its respective PP
-    this will pump out each words in the line into the lineList given
+    this will pump out each words in the line
     */
-    static void findWordBoxes(boxList lineList, boxNode *&lineBox, const int dirOfPP, int *PP, const int PPSize)
+    static boxList findWordBoxes(boxList lineList, boxNode *&lineBox, const int dirOfPP, int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;
         int minRow, maxRow = 0;
@@ -432,18 +423,19 @@ class BBox
                     maxRow = index - 1; 
                     // col is consistant
                     boxNode *newBox = new boxNode(3, minRow, lineBox->minCol, maxRow, lineBox->maxCol);
-                    newBox->printbox(1);
                     boxHead.insertLast(newBox);
                 }
                 else { 
                     maxCol = index;
                     //row is consistant
                     boxNode *newBox = new boxNode(3, lineBox->minRow, minCol, lineBox->maxRow, maxCol);
-                    newBox->printbox(1);
                     boxHead.insertLast(newBox);
                 }
             };
         }
+
+        boxHead.printList();
+        return boxHead;
     };
 };
 int main(int argc, char *argv[])
@@ -459,7 +451,7 @@ int main(int argc, char *argv[])
     boxProcessor.findImgBox(textImage.imageAry, textImage.numRows, textImage.numCols); //image box
 
     // compute HPP and VPP
-    textImage.computePP(boxProcessor.imgBox, 2);
+    textImage.computePP(boxProcessor.imgBox);
 
     //thresholding HPP and VPP with user input
     textImage.thresholding(textImage.numRows);
@@ -471,7 +463,6 @@ int main(int argc, char *argv[])
     else dirInEng = "vertical";
     cout << "\nReading DIR:" << dirInEng << "\n";
     //find text-line bouding boxes
-    cout << "\nText Line Boxes:" <<endl;
     if (readingDir == 0)
     {
         BBox::boxList lineList = BBox::findLineBoxes(textImage, boxProcessor.imgBox, 0, textImage.VPPbin, textImage.numCols);

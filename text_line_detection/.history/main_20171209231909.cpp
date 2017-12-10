@@ -401,9 +401,6 @@ class BBox
         return boxHead;
     };
 
-    /* assuming you give me a line box with its respective PP
-    this will pump out each words in the line into the lineList given
-    */
     static void findWordBoxes(boxList lineList, boxNode *&lineBox, const int dirOfPP, int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;

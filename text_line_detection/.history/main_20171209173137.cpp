@@ -386,13 +386,22 @@ class BBox
                     boxNode *newLineBox = new boxNode(2, minRow, imgBox->minCol, maxRow, imgBox->maxCol);
                     newLineBox->printbox(1);
                     boxHead.insertLast(newLineBox);
+
+                    /* for each new Line boxes we need to computePP again
+                    */
+                    img.computePP(newLineBox, 0);
+                    img.thresholding(img.numRows);
+                    cout << endl;
                 }
                 else { 
-                    maxCol = index - 1;
+                    maxCol = index;
                     //row is consistant
                     boxNode *newLineBox = new boxNode(2, imgBox->minRow, minCol, imgBox->maxRow, maxCol);
-                    newLineBox->printbox(1);
                     boxHead.insertLast(newLineBox);
+
+                    /* for each new Line boxes we need to computePP again
+                    */
+                    img.computePP(newLineBox, 0);
                 }
             };
         }
@@ -402,9 +411,9 @@ class BBox
     };
 
     /* assuming you give me a line box with its respective PP
-    this will pump out each words in the line into the lineList given
+    this will pump out each words in the line
     */
-    static void findWordBoxes(boxList lineList, boxNode *&lineBox, const int dirOfPP, int *PP, const int PPSize)
+    static boxList findWordBoxes(boxList lineList, boxNode *&lineBox, const int dirOfPP, int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;
         int minRow, maxRow = 0;
@@ -432,18 +441,19 @@ class BBox
                     maxRow = index - 1; 
                     // col is consistant
                     boxNode *newBox = new boxNode(3, minRow, lineBox->minCol, maxRow, lineBox->maxCol);
-                    newBox->printbox(1);
                     boxHead.insertLast(newBox);
                 }
                 else { 
                     maxCol = index;
                     //row is consistant
                     boxNode *newBox = new boxNode(3, lineBox->minRow, minCol, lineBox->maxRow, maxCol);
-                    newBox->printbox(1);
                     boxHead.insertLast(newBox);
                 }
             };
         }
+
+        boxHead.printList();
+        return boxHead;
     };
 };
 int main(int argc, char *argv[])

@@ -388,7 +388,7 @@ class BBox
                     boxHead.insertLast(newLineBox);
                 }
                 else { 
-                    maxCol = index - 1;
+                    maxCol = index;
                     //row is consistant
                     boxNode *newLineBox = new boxNode(2, imgBox->minRow, minCol, imgBox->maxRow, maxCol);
                     newLineBox->printbox(1);
