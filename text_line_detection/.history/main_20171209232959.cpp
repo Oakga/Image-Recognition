@@ -30,10 +30,13 @@ struct boxNode
         maxRow = maxRow_;
         maxCol = maxCol_;
     };
-
-    string boxDescription()
+    void printbox(bool skipLine)
     {
-        return to_string(minRow) +" "+ to_string(minCol) +" "+ to_string(maxRow) + " "+ to_string(maxCol);
+        if(skipLine){
+        printf("\nBOX: %u %u %u %u %u ", type, minRow, minCol, maxRow, maxCol);
+        }
+        else printf("BOX: %u %u %u %u %u ", type, minRow, minCol, maxRow, maxCol);
+
     };
 };
 class imagePP
@@ -51,11 +54,8 @@ class imagePP
     imagePP(string binaryImage, string thresholdValue, string output)
     {
         threshold = stoi(thresholdValue);
-        out << "Threshold Value: "<< thresholdValue << endl; 
-        
         imageScan.open(binaryImage);
         out.open(output);
-
         imageScan >> numRows >> numCols >> minVal >> maxVal;
 
         imageAry = new int *[numRows];
@@ -82,12 +82,6 @@ class imagePP
         delete[] VPP;
         delete[] VPPbin;
     }
-
-    void printBox(boxNode* box, string lineNum)
-    {
-        out << lineNum << endl;
-        out << box->boxDescription() << endl;
-    };
     void loadImage()
     {
         for (int i = 0; i < numRows; i++)
@@ -99,23 +93,49 @@ class imagePP
         }
     }
 
-    void computePP(boxNode *&box)
+    //if compute both dir = 2, otherwise dir is direction you want to compute
+    void computePP(boxNode *&box, const int dir)
     { 
+        //empty out the arrays that we going to use 
+        if(dir == 2){
+            memset(HPP, 0, sizeof(int) * numRows);
+            memset(HPPbin, 0, sizeof(int) * numRows);
+            memset(VPP, 0, sizeof(int) * numCols);
+            memset(VPP, 0, sizeof(int) * numCols);
+        }
+        else if(dir == 1){
+            memset(HPP, 0, sizeof(int) * numRows);
+            memset(HPPbin, 0, sizeof(int) * numRows);
+        }
+        else {
+            memset(VPP, 0, sizeof(int) * numCols);
+            memset(VPP, 0, sizeof(int) * numCols);
+        };
+
+        ///computation
         for (int i = box->minRow; i < box->maxRow; i++)
         {
             for (int j = box->minCol; j < box->maxCol; j++)
             {
                 if (imageAry[i][j] > 0)
                 {
+                    if(dir == 2) {
                         HPP[i]++;
                         VPP[j]++;
+                    }
+                    else if(dir == 1) HPP[i]++;
+                    else VPP[j]++;
                 }
             }
         }
 
         //printing
+        if(dir == 2){
         printPP(HPP, numRows, "Horizontal Projection Profile");
         printPP(VPP, numCols, "Vertical Projection Profile");
+        }
+        else if (dir == 1) printPP(HPP, numRows, "Horizontal Projection Profile");
+        else printPP(VPP, numCols, "Vertical Projection Profile");
     };
 
     void printPP(int *arr, int size, string name)
@@ -131,6 +151,7 @@ class imagePP
     void thresholding(const int size)
     {
         //check which array we want to threshold i.e VPP or HPP
+        out << "\nThresholding \n";
         int *arr;
         int *arrBin;
         string arrName;
@@ -138,13 +159,13 @@ class imagePP
         {
             arr = HPP;
             arrBin = HPPbin;
-            arrName = "Binary Horizontal Projection Profile";
+            arrName = "Horizontal Projection Profile";
         }
         else
         {
             arr = VPP;
             arrBin = VPPbin;
-            arrName = "Binary Vertical Projection Profile";
+            arrName = "Vertical Projection Profile";
         };
 
         //thresholding
@@ -164,16 +185,11 @@ class imagePP
     {
         int HPPboxCt = countBoxes(numRows);
         int VPPboxCt = countBoxes(numCols);
-        if (HPPboxCt > VPPboxCt){
-            out << "\nReading Direction: HORIZONTAL"<< endl;
-            out << "\nBox Format: minRow minCol maxRow maxCol" << endl;
+        printf("\nBOXCOUNT H: %u V: %u", HPPboxCt, VPPboxCt);
+        if (HPPboxCt > VPPboxCt)
             return 1; // horinzontal
-        }
-        else {
-            out << "\nReading Direction: VERTICAL"<< endl;
-            out << "\nBox Format: minRow minCol maxRow maxCol" << endl;
+        else
             return 0; //vertical
-        }
     }
 
     int countBoxes(const int size)
@@ -184,10 +200,12 @@ class imagePP
         if (size == numRows)
         {
             arrBin = HPPbin;
+            arrName = "HOR";
         }
         else
         {
             arrBin = VPPbin;
+            arrName = "VER";
         };
 
         //counting
@@ -251,6 +269,22 @@ class BBox
             last = box;
         }
 
+        void printList()
+        {
+            boxNode *spot = listHead->nextBox;
+            cout << "\n";
+            cout << "ListHead-->";
+            while (spot != 0)
+            {
+                cout << "(";
+                spot->printbox(false);
+                cout << ") -->";
+                spot = spot->nextBox;
+            }
+            cout << "NULL\n";
+            delete spot;
+        }
+
         void freeList()
         {
             boxNode *spot = listHead;
@@ -276,14 +310,14 @@ class BBox
         }
     };
 
-    boxNode* findImgBox(imagePP &img)
-    {   
+    boxNode* findImgBox(int **&imgAry, const int numRows, const int numCols)
+    {
         bool firstTime = true;
-        for (int i = 0; i < img.numRows; i++)
+        for (int i = 0; i < numRows; i++)
         {
-            for (int j = 0; j < img.numCols; j++)
+            for (int j = 0; j < numCols; j++)
             {
-                if (img.imageAry[i][j] > 0)
+                if (imgAry[i][j] > 0)
                 {
                     // intialized the imgBox class object if first time
                     if (firstTime == true)
@@ -298,6 +332,7 @@ class BBox
                 };
             };
         };
+        imgBox->printbox(true);
         return imgBox;
     };
 
@@ -319,7 +354,6 @@ class BBox
         int minCol, maxCol = 0;
         int minRow, maxRow = 0;
         boxList boxHead;
-        int textLineCounter = 1;
         int index = 0;
         while (index < PPSize)
         {
@@ -343,25 +377,26 @@ class BBox
                     maxRow = index - 1; 
                     // col is consistant
                     boxNode *newLineBox = new boxNode(2, minRow, imgBox->minCol, maxRow, imgBox->maxCol);
-                    img.printBox(newLineBox, "1."+to_string(textLineCounter));
-                    textLineCounter++;
+                    newLineBox->printbox(1);
                     boxHead.insertLast(newLineBox);
-
                 }
                 else { 
                     maxCol = index - 1;
                     //row is consistant
                     boxNode *newLineBox = new boxNode(2, imgBox->minRow, minCol, imgBox->maxRow, maxCol);
-                    img.printBox(newLineBox, "1."+to_string(textLineCounter));
-                    textLineCounter++;
+                    newLineBox->printbox(1);
                     boxHead.insertLast(newLineBox);
                 }
             };
         }
 
+        boxHead.printList();
         return boxHead;
     };
 
+    /* assuming you give me a line box with its respective PP
+    this will pump out each words in the line into the lineList given
+    */
     static void findWordBoxes(boxList lineList, boxNode *&lineBox, const int dirOfPP, int *PP, const int PPSize)
     {
         int minCol, maxCol = 0;
@@ -390,12 +425,14 @@ class BBox
                     maxRow = index - 1; 
                     // col is consistant
                     boxNode *newBox = new boxNode(3, minRow, lineBox->minCol, maxRow, lineBox->maxCol);
+                    newBox->printbox(1);
                     boxHead.insertLast(newBox);
                 }
                 else { 
                     maxCol = index;
                     //row is consistant
                     boxNode *newBox = new boxNode(3, lineBox->minRow, minCol, lineBox->maxRow, maxCol);
+                    newBox->printbox(1);
                     boxHead.insertLast(newBox);
                 }
             };
@@ -405,16 +442,17 @@ class BBox
 int main(int argc, char *argv[])
 {
     //intializations
+    string dirInEng;
     int readingDir;
     BBox boxProcessor;
     imagePP textImage(argv[1], argv[2], argv[3]);
     textImage.loadImage();
 
     //find text image bouding box
-    boxProcessor.findImgBox(textImage);
+    boxProcessor.findImgBox(textImage.imageAry, textImage.numRows, textImage.numCols); //image box
 
     // compute HPP and VPP
-    textImage.computePP(boxProcessor.imgBox);
+    textImage.computePP(boxProcessor.imgBox, 2);
 
     //thresholding HPP and VPP with user input
     textImage.thresholding(textImage.numRows);
@@ -422,9 +460,11 @@ int main(int argc, char *argv[])
 
     //determine reading dirOfPP
     readingDir = textImage.findReadingDir();
-    
-    //print out the bouding box
-    textImage.printBox(boxProcessor.imgBox, "1");
+    if (readingDir == 1) dirInEng = "horizontal";
+    else dirInEng = "vertical";
+    cout << "\nReading DIR:" << dirInEng << "\n";
+    //find text-line bouding boxes
+    cout << "\nText Line Boxes:" <<endl;
     if (readingDir == 0)
     {
         BBox::boxList lineList = BBox::findLineBoxes(textImage, boxProcessor.imgBox, 0, textImage.VPPbin, textImage.numCols);

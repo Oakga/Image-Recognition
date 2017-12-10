@@ -51,11 +51,9 @@ class imagePP
     imagePP(string binaryImage, string thresholdValue, string output)
     {
         threshold = stoi(thresholdValue);
-        out << "Threshold Value: "<< thresholdValue << endl; 
-        
         imageScan.open(binaryImage);
         out.open(output);
-
+        out << "Threshold Value: "<< thresholdValue << endl; 
         imageScan >> numRows >> numCols >> minVal >> maxVal;
 
         imageAry = new int *[numRows];

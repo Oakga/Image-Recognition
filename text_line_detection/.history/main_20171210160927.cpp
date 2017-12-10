@@ -51,11 +51,9 @@ class imagePP
     imagePP(string binaryImage, string thresholdValue, string output)
     {
         threshold = stoi(thresholdValue);
-        out << "Threshold Value: "<< thresholdValue << endl; 
-        
         imageScan.open(binaryImage);
         out.open(output);
-
+        out << "Threshold Value: "<< thresholdValue << endl; 
         imageScan >> numRows >> numCols >> minVal >> maxVal;
 
         imageAry = new int *[numRows];
@@ -83,9 +81,9 @@ class imagePP
         delete[] VPPbin;
     }
 
-    void printBox(boxNode* box, string lineNum)
+    void printBox(boxNode* box, string num)
     {
-        out << lineNum << endl;
+        out << "num" << endl;
         out << box->boxDescription() << endl;
     };
     void loadImage()
@@ -166,12 +164,10 @@ class imagePP
         int VPPboxCt = countBoxes(numCols);
         if (HPPboxCt > VPPboxCt){
             out << "\nReading Direction: HORIZONTAL"<< endl;
-            out << "\nBox Format: minRow minCol maxRow maxCol" << endl;
             return 1; // horinzontal
         }
         else {
             out << "\nReading Direction: VERTICAL"<< endl;
-            out << "\nBox Format: minRow minCol maxRow maxCol" << endl;
             return 0; //vertical
         }
     }
@@ -343,7 +339,7 @@ class BBox
                     maxRow = index - 1; 
                     // col is consistant
                     boxNode *newLineBox = new boxNode(2, minRow, imgBox->minCol, maxRow, imgBox->maxCol);
-                    img.printBox(newLineBox, "1."+to_string(textLineCounter));
+                    img.printBox(newLineBox, "1."+stoi(textLineCounter));
                     textLineCounter++;
                     boxHead.insertLast(newLineBox);
 
@@ -352,7 +348,7 @@ class BBox
                     maxCol = index - 1;
                     //row is consistant
                     boxNode *newLineBox = new boxNode(2, imgBox->minRow, minCol, imgBox->maxRow, maxCol);
-                    img.printBox(newLineBox, "1."+to_string(textLineCounter));
+                    img.printBox(newLineBox, "1."+stoi(textLineCounter));
                     textLineCounter++;
                     boxHead.insertLast(newLineBox);
                 }
@@ -405,13 +401,14 @@ class BBox
 int main(int argc, char *argv[])
 {
     //intializations
+    string dirInEng;
     int readingDir;
     BBox boxProcessor;
     imagePP textImage(argv[1], argv[2], argv[3]);
     textImage.loadImage();
 
     //find text image bouding box
-    boxProcessor.findImgBox(textImage);
+    boxProcessor.findImgBox(textImage); //image box
 
     // compute HPP and VPP
     textImage.computePP(boxProcessor.imgBox);

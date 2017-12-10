@@ -51,11 +51,9 @@ class imagePP
     imagePP(string binaryImage, string thresholdValue, string output)
     {
         threshold = stoi(thresholdValue);
-        out << "Threshold Value: "<< thresholdValue << endl; 
-        
         imageScan.open(binaryImage);
         out.open(output);
-
+        out << "Threshold Value: "<< thresholdValue << endl; 
         imageScan >> numRows >> numCols >> minVal >> maxVal;
 
         imageAry = new int *[numRows];
@@ -166,12 +164,11 @@ class imagePP
         int VPPboxCt = countBoxes(numCols);
         if (HPPboxCt > VPPboxCt){
             out << "\nReading Direction: HORIZONTAL"<< endl;
-            out << "\nBox Format: minRow minCol maxRow maxCol" << endl;
+            out << "\n Box Format: minRow minCol maxRow maxCol" << endl;
             return 1; // horinzontal
         }
         else {
             out << "\nReading Direction: VERTICAL"<< endl;
-            out << "\nBox Format: minRow minCol maxRow maxCol" << endl;
             return 0; //vertical
         }
     }
